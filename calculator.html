@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Calculator</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: #1e1e2f; font-family: 'Segoe UI', Arial, sans-serif;
+  }
+  .calculator { background: #2a2a3d; border-radius: 20px; padding: 20px; width: 320px; }
+  .display { background: #111; color: #fff; border-radius: 12px; padding: 20px 15px; text-align: right; margin-bottom: 15px; }
+  .display .prev { font-size: 14px; color: #888; min-height: 18px; }
+  .display .curr { font-size: 32px; word-break: break-all; }
+  .buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  button { border: none; border-radius: 12px; background: #34344a; color: #fff; font-size: 20px; padding: 18px 0; cursor: pointer; }
+  button:hover { background: #45455f; }
+  button.op { background: #ff9500; }
+  button.op:hover { background: #ffab33; }
+  button.zero { grid-column: span 2; }
+  button.clear { color: #ff5f5f; }
+</style>
+</head>
+<body>
+<div class="calculator">
+  <div class="display">
+    <div class="prev" id="prev"></div>
+    <div class="curr" id="curr">0</div>
+  </div>
+  <div class="buttons">
+    <button class="clear" onclick="clearAll()">C</button>
+    <button onclick="deleteLast()">⌫</button>
+    <button class="op" onclick="chooseOp('%')">%</button>
+    <button class="op" onclick="chooseOp('÷')">÷</button>
+    <button onclick="appendNum('7')">7</button>
+    <button onclick="appendNum('8')">8</button>
+    <button onclick="appendNum('9')">9</button>
+    <button class="op" onclick="chooseOp('×')">×</button>
+    <button onclick="appendNum('4')">4</button>
+    <button onclick="appendNum('5')">5</button>
+    <button onclick="appendNum('6')">6</button>
+    <button class="op" onclick="chooseOp('-')">-</button>
+    <button onclick="appendNum('1')">1</button>
+    <button onclick="appendNum('2')">2</button>
+    <button onclick="appendNum('3')">3</button>
+    <button class="op" onclick="chooseOp('+')">+</button>
+    <button class="zero" onclick="appendNum('0')">0</button>
+    <button onclick="appendNum('.')">.</button>
+    <button class="op" onclick="calculate()">=</button>
+  </div>
+</div>
+<script>
+  let current = '0', previous = '', operator = null;
+  const currEl = document.getElementById('curr');
+  const prevEl = document.getElementById('prev');
+
+  function updateDisplay() {
+    currEl.textContent = current;
+    prevEl.textContent = previous && operator ? `${previous} ${operator}` : '';
+  }
+  function appendNum(num) {
+    if (num === '.' && current.includes('.')) return;
+    current = (current === '0' && num !== '.') ? num : current + num;
+    updateDisplay();
+  }
+  function chooseOp(op) {
+    if (operator !== null) calculate();
+    previous = current; operator = op; current = '0';
+    updateDisplay();
+  }
+  function calculate() {
+    if (operator === null || previous === '') return;
+    const a = parseFloat(previous), b = parseFloat(current);
+    let result;
+    switch (operator) {
+      case '+': result = a + b; break;
+      case '-': result = a - b; break;
+      case '×': result = a * b; break;
+      case '÷': result = b === 0 ? 'Error' : a / b; break;
+      case '%': result = a % b; break;
+      default: return;
+    }
+    current = result.toString(); operator = null; previous = '';
+    updateDisplay();
+  }
+  function clearAll() { current = '0'; previous = ''; operator = null; updateDisplay(); }
+  function deleteLast() { current = current.length > 1 ? current.slice(0, -1) : '0'; updateDisplay(); }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key >= '0' && e.key <= '9') appendNum(e.key);
+    else if (e.key === '.') appendNum('.');
+    else if (e.key === '+') chooseOp('+');
+    else if (e.key === '-') chooseOp('-');
+    else if (e.key === '*') chooseOp('×');
+    else if (e.key === '/') { e.preventDefault(); chooseOp('÷'); }
+    else if (e.key === 'Enter' || e.key === '=') calculate();
+    else if (e.key === 'Backspace') deleteLast();
+    else if (e.key === 'Escape') clearAll();
+  });
+</script>
+</body>
+</html>
